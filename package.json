@@ -4,6 +4,7 @@
   "description": "*Note: this guide assumes you already have a basic express web server with body-parser set up*",
   "main": "server.js",
   "dependencies": {
+    "bcrypt": "^0.8.7",
     "express": "^4.14.0",
     "express-session": "^1.14.0",
     "mongoose": "^4.5.7",
