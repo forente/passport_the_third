@@ -1,14 +1,21 @@
 var express = require('express');
 var passport = require('passport');
 var mongoose = require('mongoose');
+var path = require('path');
+var bodyParser = require('body-parser');
 
 var session = require('express-session');
 var User = require('./models/user');
+var login = require('./routes/login');
+var register = require('./routes/register');
 
 var app = express();
 
 var mongoURI = 'mongodb://localhost:27017/demo_register';
 var MongoDB = mongoose.connect(mongoURI).connection;
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended:true}));
 
 MongoDB.on('error', function (err) {
    console.log('mongodb connection error', err);
@@ -38,22 +45,30 @@ passport.use('local', new localStrategy({ passReqToCallback: true, usernameField
       if(err){
         throw err;
       }
+      if(!user){
+        return done(null, false, {message: 'Incorrect username or password.'});
+      }
+      //test a ma
+      user.comparePassword(password, function(err, isMatch) {
+        if (err) {
+          throw err;
+        }
 
-      if (isMatch){
-        return done(null, user);
-      }
-      else {
-        doen(null, false, {message: 'Incorrect username and password.'});
-      }
+        if (isMatch) {
+          return done(null, user);
+        } else {
+          done(null, false, { message: 'Incorrect username and password.' });
+        }
+      });
     });
   })
 );
 
-passport.serializedUser(function(user, done){
+passport.serializeUser(function(user, done){
   done(null, user.id);
 });
 
-passport.serializedUser(function(user, done){
+passport.deserializeUser(function(user, done){
   User.findById(id, function(err, user){
     if(err){
       return done(err);
@@ -61,6 +76,15 @@ passport.serializedUser(function(user, done){
     done(null, user);
   });
 });
+
+app.use(express.static('public'));
+
+app.get('/', function(req, res, next){
+    res.sendFile(path.join(__dirname, 'public/views/login.html'));
+});
+
+app.use('/register', register);
+app.use('/login', login);
 
 
 
