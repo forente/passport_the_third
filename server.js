@@ -1,8 +1,9 @@
 var express = require('express');
 var passport = require('passport');
-var mongoose = require('mongoose');
+// var mongoose = require('mongoose');
 var path = require('path');
 var bodyParser = require('body-parser');
+var localStrategy = require('passport-local').Strategy;
 
 var session = require('express-session');
 var User = require('./models/user');
@@ -11,19 +12,19 @@ var register = require('./routes/register');
 
 var app = express();
 
-var mongoURI = 'mongodb://localhost:27017/demo_register';
-var MongoDB = mongoose.connect(mongoURI).connection;
+// var mongoURI = 'mongodb://localhost:27017/demo_register';
+// var MongoDB = mo ngoose.connect(mongoURI).connection;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}));
 
-MongoDB.on('error', function (err) {
-   console.log('mongodb connection error', err);
-});
-
-MongoDB.once('open', function () {
- console.log('mongodb connection open');
-});
+// MongoDB.on('error', function (err) {
+//    console.log('mongodb connection error', err);
+// });
+//
+// MongoDB.once('open', function () {
+//  console.log('mongodb connection open');
+// });
 
 app.use(session({
   secret:'secret',
@@ -33,36 +34,34 @@ app.use(session({
   cookie:{ maxAge:60000, secure:false}
 }));
 
-var localStrategy = require('passport-local').Strategy;
-
 app.use(passport.initialize());
 app.use(passport.session());
 
-passport.use('local', new localStrategy({ passReqToCallback: true, usernameField: 'username'},
-  function(req, username, password, done ){
-    //TODO :
-    User.findOne({username: username}, function(err,user){
-      if(err){
-        throw err;
-      }
-      if(!user){
-        return done(null, false, {message: 'Incorrect username or password.'});
-      }
-      //test a ma
-      user.comparePassword(password, function(err, isMatch) {
-        if (err) {
-          throw err;
-        }
-
-        if (isMatch) {
-          return done(null, user);
-        } else {
-          done(null, false, { message: 'Incorrect username and password.' });
-        }
-      });
-    });
-  })
-);
+// passport.use('local', new localStrategy({ passReqToCallback: true, usernameField: 'username'},
+//   function(req, username, password, done ){
+//     //TODO :
+//     User.findOne({username: username}, function(err,user){
+//       if(err){
+//         throw err;
+//       }
+//       if(!user){
+//         return done(null, false, {message: 'Incorrect username or password.'});
+//       }
+//       //test a ma
+//       user.comparePassword(password, function(err, isMatch) {
+//         if (err) {
+//           throw err;
+//         }
+//
+//         if (isMatch) {
+//           return done(null, user);
+//         } else {
+//           done(null, false, { message: 'Incorrect username and password.' });
+//         }
+//       });
+//     });
+//   })
+// );
 
 
 passport.serializeUser(function(user, done){
